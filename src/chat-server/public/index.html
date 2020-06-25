@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="chat.js"></script>
+    <title>Chat Example</title>
+
+    <script type="text/javascript">
+        window.onload = function () {
+            let chat = new Chat("ws://localhost:8080/chat", document.getElementById('log'));
+
+            document.getElementById("form").onsubmit = function () {
+                if (msg.value.startsWith('/join ')) {
+                    chat.conn.send(JSON.stringify({"Type": 2, "Text": msg.value.replace('/join ', '')}));
+                } else {
+                    chat.conn.send(JSON.stringify({"Type": 0, "Text": msg.value}));
+                }
+                my = msg.value;
+                msg.value = "";
+                return false;
+            };
+            chat.onclose(function (evt) {
+                appendLog("<div><b>Connection closed.</b></div>");
+            });
+
+            chat.onopen(function (evt) {
+                chat.conn.send(JSON.stringify({
+                    "Type": 1,
+                    "Text": 'lol:password'
+                }));
+            });
+            chat.onmessage(function (evt) {
+                var messages = evt.data.split('\n');
+                for (var i = 0; i < messages.length; i++) {
+                    chat.appendLog(`<div>${JSON.parse(messages[i]).Text}</div>`);
+                }
+            });
+        }
+
+        window.onfocus = function () {
+            document.title = "Application Name";
+        };
+    </script>
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: gray;
+        }
+
+        #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 12.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        }
+
+        #log1 {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        }
+
+        #form {
+            padding: 0 0.5em 0 0.5em;
+            margin: 0;
+            position: absolute;
+            bottom: 1em;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+        }
+
+    </style>
+</head>
+<body>
+<audio controls style="display: none" id="music">
+    <source src="zvuk-na-sms-zvuk-na-sms.mp3" type="audio/ogg"/>
+</audio>
+<div id="log1"></div>
+<div id="log"></div>
+<form id="form">
+    <input type="submit" value="Send"/>
+    <input type="text" id="msg" size="64"/>
+</form>
+</body>
+</html>

@@ -1,0 +1,452 @@
+﻿<html lang="en"><head>
+    <title>Application Name</title>
+          
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ <!-- Compiled and minified CSS -->
+ <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+    <link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+    <link rel="stylesheet" href="style.css" />
+	 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="lib/css/emoji.css" rel="stylesheet">
+   <script src="lib/js/config.js"></script>
+  <script src="lib/js/util.js"></script>
+  <script src="lib/js/jquery.emojiarea.js"></script>
+  <script src="lib/js/emoji-picker.js"></script>
+  <script type="text/javascript" src="emoji.js"></script>
+     <script type="text/javascript">
+
+
+
+        window.onload = function () {
+		
+		 var current = 0;
+
+
+
+
+		 function setCookie(name, value, options) {
+  options = options || {};
+
+  var expires = options.expires;
+
+  if (typeof expires == "number" && expires) {
+    var d = new Date();
+    d.setTime(d.getTime() + expires * 1000);
+    expires = options.expires = d;
+  }
+  if (expires && expires.toUTCString) {
+    options.expires = expires.toUTCString();
+  }
+
+  value = encodeURIComponent(value);
+
+  var updatedCookie = name + "=" + value;
+
+  for (var propName in options) {
+    updatedCookie += "; " + propName;
+    var propValue = options[propName];
+    if (propValue !== true) {
+      updatedCookie += "=" + propValue;
+    }
+  }
+
+  document.cookie = updatedCookie;
+}
+
+
+function getCookie(name) {
+  var matches = document.cookie.match(new RegExp(
+    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+  ));
+  return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+		$("body").on("input", "#msg", function()
+			{
+			if($("#msg").val()!=''){
+			conn.send(JSON.stringify({"Type": 9, "Text": 't'}))
+			}else{
+			conn.send(JSON.stringify({"Type": 9, "Text": '0'}))
+			}
+			})
+            var conn;
+            var my;
+            var msg = document.getElementById("msg");
+            var log = document.getElementById("log");
+            var log1 = document.getElementById("log1");
+
+            function appendLog(item) {
+                var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+				 $("#log").append(item)
+                if (doScroll) {
+                    log.scrollTop = log.scrollHeight - log.clientHeight;
+                }
+            }
+
+            function appendLog1(x) {
+                var doScroll = log1.scrollTop > log1.scrollHeight - log1.clientHeight - 1;
+
+                $("#log1").append(x)
+                if (doScroll) {
+                    log1.scrollTop = log1.scrollHeight - log1.clientHeight;
+                }
+            }
+			
+			$("#name_submit").click(function(){
+				setCookie('name',$("#name").val());
+				conn.send(JSON.stringify({"Type": 5, "Text": $("#name").val()}));
+			})
+            document.getElementById("form").onsubmit = function () {
+
+                if (!conn) {
+                    return false;
+                }
+                if (!msg.value) {
+                    return false;
+                }
+				conn.send(JSON.stringify({"Type": 9, "Text": '0'}))
+                conn.send(JSON.stringify({"Type": 1, "Text": msg.value}));
+                my = msg.value;
+                msg.value = "";
+                return false;
+            };
+			
+			$("body").on('click','#idshka',function () {
+                document.getElementById('idshka').src = "https://loremflickr.com/320/240?" + new Date().getTime();
+})
+
+            if (window["WebSocket"]) {
+			
+                conn = new WebSocket("wss://192.168.5.41:8080/chat");
+                conn.onclose = function (evt) {
+                    var item = document.createElement("div");
+                    item.innerHTML = "<b>Connection closed.</b>";
+                    appendLog(item);
+                };
+                conn.onopen = function (evt) {
+					var name = 'lol'
+					if (getCookie('name')!=='undefined'){
+						name = getCookie('name')
+		
+					}
+					$("#name").val(name)
+                    conn.send(JSON.stringify({"Type": 5, "Text": name}));
+                }
+                conn.onmessage = function (evt) {
+                 
+                    var messages = evt.data.split('\n');
+
+                    for (var i = 0; i < messages.length; i++) {
+                        if (JSON.parse(messages[i]).Type == 2) {
+                            var div = document.getElementById("log1");
+                            while (div.firstChild) {
+                                div.removeChild(div.firstChild);
+                            }
+							console.log(JSON.parse(messages[i]).Text);
+                            var loler = JSON.parse(messages[i]).Text.split("\n");
+                            var item = "";
+                            for (var j = 0; j < loler.length; ++j) {
+                                item += "<div  style=\"display:inline;\">" + loler[j] + "</div><br>"
+                                console.log(item);
+                            }
+                            appendLog1(item);
+                        } else {
+						if (JSON.parse(messages[i]).Type == 10) {
+						     var now = new Date().toLocaleTimeString()
+						   var  name = JSON.parse(messages[i]).Text.split(": ")[0]
+							var item = `<div>${now} `+name+"<span style=\"font-size:12px;\"><i>: Dj next music please" + "</i></span></div>";
+                            appendLog(item)
+							current = JSON.parse(messages[i]).Text.split(": ")[1];
+							find();
+						}else{
+						if (JSON.parse(messages[i]).Type == 9) {
+						   var  name = JSON.parse(messages[i]).Text.split(": ")[0]
+						   var text = JSON.parse(messages[i]).Text.split(": ")[1];
+						   if(text=='0'){
+						    $("#write").html('');
+						   }else{
+							$("#write").html(name + ' пишет......');
+						   }
+							
+						}
+						else{
+						var  name = JSON.parse(messages[i]).Text.split(": ")[0]+": "
+						var text = JSON.parse(messages[i]).Text.split(": ")[1];
+						if (text=='pause'){
+											
+						}else{
+						if(text=='next'){
+							conn.send(JSON.stringify({"Type": 10, "Text": (Math.floor(Math.random() * 10500000) + 1).toString()}));
+						}
+						var now = new Date().toLocaleTimeString()
+
+						var item = `<div class="chat-body">
+                            <span class="time">${now}</span>
+                    		<div class="header" style="display:inline;">
+                    			<strong class="primary-font">`+name+`</strong>
+                    		</div>
+
+                    		<p style="display:inline;">
+                    			`+window.emoji.replace(JSON.parse(messages[i]).Text.split(": ")[1])+`
+                    		</p>
+
+                    	</div>`;
+							//var item = "<div>" + JSON.parse(messages[i]).Text + "</div>";
+                            appendLog(item);
+							console.log(item);}
+
+                        }
+							}
+                            
+                        }
+
+                    }
+                };
+            } else {
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+                appendLog(item);
+            }}
+			
+
+
+
+			
+			
+			
+			
+			
+			
+        window.onfocus = function () {
+            //console.log('a');
+            document.title = "Application Name";
+        };
+		
+		var myGamePiece;
+var myObstacles = [];
+var myScore;
+
+function startGame() {
+    myGamePiece = new component(30, 30, "red", 10, 120);
+    myGamePiece.gravity = 0.05;
+    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+    myGameArea.start();
+}
+
+var myGameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = 480;
+        this.canvas.height = 270;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo = 0;
+        this.interval = setInterval(updateGameArea, 20);
+        },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+}
+
+function component(width, height, color, x, y, type) {
+    this.type = type;
+    this.score = 0;
+    this.width = width;
+    this.height = height;
+    this.speedX = 0;
+    this.speedY = 0;    
+    this.x = x;
+    this.y = y;
+    this.gravity = 0;
+    this.gravitySpeed = 0;
+    this.update = function() {
+        ctx = myGameArea.context;
+        if (this.type == "text") {
+            ctx.font = this.width + " " + this.height;
+            ctx.fillStyle = color;
+            ctx.fillText(this.text, this.x, this.y);
+        } else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+    this.newPos = function() {
+        this.gravitySpeed += this.gravity;
+        this.x += this.speedX;
+        this.y += this.speedY + this.gravitySpeed;
+        this.hitBottom();
+    }
+    this.hitBottom = function() {
+        var rockbottom = myGameArea.canvas.height - this.height;
+        if (this.y > rockbottom) {
+            this.y = rockbottom;
+            this.gravitySpeed = 0;
+        }
+    }
+    this.crashWith = function(otherobj) {
+        var myleft = this.x;
+        var myright = this.x + (this.width);
+        var mytop = this.y;
+        var mybottom = this.y + (this.height);
+        var otherleft = otherobj.x;
+        var otherright = otherobj.x + (otherobj.width);
+        var othertop = otherobj.y;
+        var otherbottom = otherobj.y + (otherobj.height);
+        var crash = true;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            crash = false;
+        }
+        return crash;
+    }
+}
+
+function updateGameArea() {
+    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+    for (i = 0; i < myObstacles.length; i += 1) {
+        if (myGamePiece.crashWith(myObstacles[i])) {
+            return;
+        } 
+    }
+    myGameArea.clear();
+    myGameArea.frameNo += 1;
+    if (myGameArea.frameNo == 1 || everyinterval(150)) {
+        x = myGameArea.canvas.width;
+        minHeight = 20;
+        maxHeight = 200;
+        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+        minGap = 50;
+        maxGap = 200;
+        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
+        myObstacles.push(new component(10, height, "green", x, 0));
+        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+    }
+    for (i = 0; i < myObstacles.length; i += 1) {
+        myObstacles[i].x += -1;
+        myObstacles[i].update();
+    }
+    myScore.text="SCORE: " + myGameArea.frameNo;
+    myScore.update();
+    myGamePiece.newPos();
+    myGamePiece.update();
+}
+
+function everyinterval(n) {
+    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+    return false;
+}
+
+function accelerate(n) {
+    myGamePiece.gravity = n;
+}
+
+</script>
+    <style type="text/css">
+	
+@-webkit-keyframes blink6 {
+ 10% { transform: scale(1, 1) rotate(80deg); }
+ 20% { transform: scale(0, 0) rotate(160deg); }
+ 100% { transform: scale(0, 0) rotate(0deg); }
+}
+@keyframes blink6 {
+ 10% { transform: scale(1, 1) rotate(80deg); }
+ 20% { transform: scale(0, 0) rotate(160deg); }
+ 100% { transform: scale(0, 0) rotate(0deg); }
+}
+#blink6 {
+  position: relative;
+  display: inline-block;
+  color: #fff;
+  text-shadow: 0 0 10px #3d7a97;
+}
+#blink6:after, #blink6:before {
+  content: "";
+  position: absolute; top: 0; left: 0;
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-image: 
+    radial-gradient(rgba(255,255,255,1), rgba(255,255,255,0) 30%),
+    linear-gradient(45deg, rgba(0,0,0,0) 49%, rgba(255,255,255,.4) 50%, rgba(0,0,0,0) 51%),
+    linear-gradient(135deg, rgba(0,0,0,0) 49%, rgba(255,255,255,.4) 50%, rgba(0,0,0,0) 51%);
+  -webkit-animation: blink6 10s linear infinite;
+  animation: blink6 10s linear infinite;
+  transform: scale(0, 0) rotate(0deg);
+}
+#blink6:before {
+  top: -30%;
+  right: 0; left: auto;
+  -webkit-animation-delay: 5s;
+  animation-delay: 5s;
+}
+@media (max-width: 639px) {
+    #log{
+        max-width: 100%;
+    }
+}
+@media (max-width: 639px) {
+    #name{
+        max-width: 71%;
+    }
+}
+@media (max-width: 800px) {
+    #name{
+        max-width: 50%;
+    }
+}
+#log {
+            overflow: auto;
+    max-height: 750px;
+        }
+#log1 {
+            overflow: auto;
+    max-height: 750px;
+        }
+        .player li{
+            display: inline;
+        }
+        .player li * {
+            vertical-align: middle;
+        }
+        .player li button{
+            margin: 0;
+        }
+        ul{ text-align:center;width:450px;margin-left:auto;margin-right:auto;margin-bottom: 10px;margin-top: 10px;}
+        * {
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  height: 100%;
+}
+    </style>
+</head>
+<body>
+<!--<img src="https://loremflickr.com/320/240" id="idshka"/>-->
+ <ul class='player' style="display: inline-block;width: 100%;">
+ 
+     <li><input type="text" style="margin-left:10%;width: 20%; margin-bottom: 0px;" placeholder="login" id="name"></li>
+     <li><button class="button button-outline"  id="name_submit">Сменить ник</button></li>
+ </ul>
+<p>
+
+</p>
+
+<div class="container" style="max-width: 150rem;display: flex;flex-direction: column;height: 100%;">
+ <div class="row" style="flex: 1 0 auto;" >
+    <div class="column" id="log1" style="border: 1px solid black"></div>
+    <div class="column column-80" id="log" style="border: 1px solid black"></div>
+  </div>
+    <div class="row" style="flex: 0 0 auto;">
+        <form id="form" style="width: 100%">
+  <fieldset>
+    <label for="msg">Сообщение<span id="write" style="margin-left: 10px;"></span></label>
+      <input type="text" id="msg" size="64" data-emojiable="true" class="form-control">
+
+    <input class="button-primary" type="submit" value="Send">
+  </fieldset>
+</form>
+
+    </div>
+</div>
+</body></html>
